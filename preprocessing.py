@@ -2,8 +2,8 @@ import numpy as np
 from scipy.misc import imread
 from scipy.misc import imresize
 
-
 VGG_16_IMAGE_SHAPE = (224, 224)
+
 
 def preprocess_image_batch(image_paths, crop_size=None, color_mode='rgb',
                            out=None):
@@ -48,4 +48,3 @@ def preprocess_image_batch(image_paths, crop_size=None, color_mode='rgb',
         out.append(img_batch)
     else:
         return img_batch
-

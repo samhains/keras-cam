@@ -1,19 +1,22 @@
-from keras.models import Sequential
-from keras.layers import Convolution2D, ZeroPadding2D, MaxPooling2D
-from keras.layers.core import Flatten, Dense, Dropout, Lambda
-from keras import backend as K
 import h5py
+from keras import backend as K
+from keras.layers import Convolution2D, ZeroPadding2D, MaxPooling2D
+from keras.layers.core import Dense, Lambda
+from keras.models import Sequential
 from keras.optimizers import SGD
 
+
 def global_average_pooling(x):
-    return K.mean(x, axis = (2, 3))
+    return K.mean(x, axis=(2, 3))
+
 
 def global_average_pooling_shape(input_shape):
     return input_shape[0:2]
 
+
 def VGG16_convolutions():
     model = Sequential()
-    model.add(ZeroPadding2D((1,1),input_shape=(3,None,None)))
+    model.add(ZeroPadding2D((1, 1), input_shape=(3, None, None)))
     model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_1'))
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(64, 3, 3, activation='relu', name='conv1_2'))
@@ -49,24 +52,26 @@ def VGG16_convolutions():
     model.add(Convolution2D(512, 3, 3, activation='relu', name='conv5_3'))
     return model
 
+
 def get_model(nb_classes):
     model = VGG16_convolutions()
 
     model = load_model_weights(model, "vgg16_weights.h5")
-    
+
     print("NUMBER OF CLASSES", nb_classes)
-    model.add(Lambda(global_average_pooling, 
-              output_shape=global_average_pooling_shape))
-    model.add(Dense(nb_classes, activation = 'softmax', init='uniform'))
+    model.add(Lambda(global_average_pooling,
+                     output_shape=global_average_pooling_shape))
+    model.add(Dense(nb_classes, activation='softmax', init='uniform'))
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.5, nesterov=True)
-    model.compile(loss = 'categorical_crossentropy', optimizer = sgd, metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
     # model.compile(loss='binary_crossentropy',
-          # optimizer='rmsprop',
-          # metrics=['accuracy'])
+    # optimizer='rmsprop',
+    # metrics=['accuracy'])
     return model
 
+
 def load_model_weights(model, weights_path):
-    print 'Loading model.'
+    print('Loading model.')
     f = h5py.File(weights_path)
     for k in range(f.attrs['nb_layers']):
         if k >= len(model.layers):
@@ -77,8 +82,9 @@ def load_model_weights(model, weights_path):
         model.layers[k].set_weights(weights)
         model.layers[k].trainable = False
     f.close()
-    print 'Model loaded.'
+    print('Model loaded.')
     return model
+
 
 def get_output_layer(model, layer_name):
     # get the symbolic outputs of each "key" layer (we gave them unique names).

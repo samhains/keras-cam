@@ -1,19 +1,20 @@
-import cv2
-
 import glob
 import os
+
+import cv2
 import numpy as np
 from keras.utils.np_utils import to_categorical
+
 from preprocessing import preprocess_image_batch
 
 CLASS_NAME_MAPPING = {}
 PER_CLASS_MAX_IMAGES = 24
 
 
-def load_data(path): 
+def load_data(path):
     data_set_input_images_files, data_set_input_images_true_label = get_class_wise_images_and_true_label(path)
     processed_input_images = [preprocess_image_batch([image])
-                               for image in data_set_input_images_files]
+                              for image in data_set_input_images_files]
 
     global CLASS_NAME_MAPPING
     nb_classes = len(CLASS_NAME_MAPPING.keys())
@@ -23,7 +24,6 @@ def load_data(path):
     y_out = to_categorical(y_out, nb_classes=nb_classes)  # to get sofmax shape of (None, nb_classes)
     Y_train = y_out
 
-
     from sklearn.utils import shuffle
     X_train, Y_train = shuffle(X_train, Y_train)
 
@@ -31,7 +31,7 @@ def load_data(path):
 
 
 def get_class_wise_images_and_true_label(path):
-    print('path', path+"/*")
+    print('path', path + "/*")
     directory = glob.glob(path + '/*')
     data_set_input_images = []
     data_set_input_images_true_label = []
@@ -47,6 +47,7 @@ def get_class_wise_images_and_true_label(path):
             index += 1
     return data_set_input_images, data_set_input_images_true_label
 
+
 def load_inria_person(path):
     pos_path = os.path.join(path, "pos")
     neg_path = os.path.join(path, "neg")
@@ -57,5 +58,5 @@ def load_inria_person(path):
     y = [1] * len(pos_images) + [0] * len(neg_images)
     y = to_categorical(y, 2)
     X = np.float32(pos_images + neg_images)
-    
+
     return X, y
